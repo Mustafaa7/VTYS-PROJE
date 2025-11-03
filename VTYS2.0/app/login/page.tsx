@@ -6,6 +6,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
 import { tr } from '@/lib/i18n'
 import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react'
+import Navbar from '@/app/components/Navbar'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -38,7 +39,15 @@ export default function LoginPage() {
 
     setLoading(true)
     try {
-      await signInWithEmailAndPassword(auth, email, password)
+      const userCredential = await signInWithEmailAndPassword(auth, email, password)
+
+      if (!userCredential.user.emailVerified) {
+        setError('E-postanız henüz doğrulanmamış. Lütfen e-postanızı doğrulayın.')
+        await auth.signOut()
+        router.push('/verify-email')
+        return
+      }
+
       router.push('/dashboard')
     } catch (err: any) {
       if (err.code === 'auth/user-not-found') {
@@ -58,7 +67,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <Navbar />
+      <div className="flex items-center justify-center min-h-[calc(100vh-80px)] px-4">
       <div className="w-full max-w-md">
         <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-slate-700/50 p-8 shadow-2xl">
           <div className="mb-8">
@@ -141,6 +152,7 @@ export default function LoginPage() {
         <p className="text-slate-500 text-xs text-center mt-6">
           © 2024 AILearning. Tüm hakları saklıdır.
         </p>
+      </div>
       </div>
     </div>
   )

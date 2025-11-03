@@ -2,10 +2,11 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createUserWithEmailAndPassword, signOut } from 'firebase/auth'
+import { createUserWithEmailAndPassword, signOut, sendEmailVerification } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
 import { tr } from '@/lib/i18n'
 import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react'
+import Navbar from '@/app/components/Navbar'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -48,6 +49,7 @@ export default function RegisterPage() {
     setLoading(true)
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+      await sendEmailVerification(userCredential.user)
       await signOut(auth)
       router.push('/verify-email')
     } catch (err: any) {
@@ -66,7 +68,9 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <Navbar />
+      <div className="flex items-center justify-center min-h-[calc(100vh-80px)] px-4">
       <div className="w-full max-w-md">
         <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-slate-700/50 p-8 shadow-2xl">
           <div className="mb-8">
@@ -164,6 +168,7 @@ export default function RegisterPage() {
         <p className="text-slate-500 text-xs text-center mt-6">
           {tr.register.terms}
         </p>
+      </div>
       </div>
     </div>
   )

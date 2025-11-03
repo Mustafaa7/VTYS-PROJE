@@ -1,31 +1,20 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { onAuthStateChanged } from 'firebase/auth'
-import { auth } from '@/lib/firebase'
+import { useAuth } from '@/lib/hooks/useAuth'
+import Navbar from '@/app/components/Navbar'
 import { tr } from '@/lib/i18n'
-import { BookOpen, ArrowRight, Zap } from 'lucide-react'
+import { ArrowRight, Zap, Loader2 } from 'lucide-react'
 
 export default function Home() {
   const router = useRouter()
-  const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser)
-      setLoading(false)
-    })
-
-    return () => unsubscribe()
-  }, [])
+  const { user, loading } = useAuth()
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-slate-600 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <Loader2 className="w-12 h-12 text-blue-500 animate-spin mx-auto mb-4" />
           <p className="text-slate-400">{tr.common.loading}</p>
         </div>
       </div>
@@ -34,39 +23,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <header className="border-b border-slate-700/50 backdrop-blur-xl bg-slate-900/50">
-        <nav className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <BookOpen className="w-8 h-8 text-blue-500" />
-            <span className="text-xl font-bold text-white">AILearning</span>
-          </div>
-          <div className="flex items-center gap-4">
-            {user ? (
-              <>
-                <span className="text-slate-400 text-sm">{user.email}</span>
-                <button
-                  onClick={() => {
-                    auth.signOut()
-                    router.push('/')
-                  }}
-                  className="px-4 py-2 text-slate-300 hover:text-white transition"
-                >
-                  {tr.common.signOut}
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => router.push('/register')}
-                  className="px-4 py-2 text-slate-300 hover:text-white transition"
-                >
-                  {tr.home.register}
-                </button>
-              </>
-            )}
-          </div>
-        </nav>
-      </header>
+      <Navbar />
 
       <main className="max-w-6xl mx-auto px-4 py-20">
         <div className="text-center mb-20">
